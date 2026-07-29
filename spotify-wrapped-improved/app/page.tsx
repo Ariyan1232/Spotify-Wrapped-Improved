@@ -1,10 +1,52 @@
+"use client"
+
 import PixelBlast from "@/components/PixelBlast";
+import { Dock } from "@/components/unlumen-ui/dock";
+import SplitText from "@/components/SplitText";
+
+const items = [
+  { icon: "🌐", label: "Browser" },
+  { icon: "📁", label: "Files", href: "/files" },
+  { icon: "🎵", label: "Music", href: "/music" },
+  { icon: "📷", label: "Photos", href: "/photos" },
+  { icon: "⚙️", label: "Settings", href: "/settings" },
+];
+
+const handleAnimationComplete = () => {
+  console.log('All letters have animated!');
+};
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <div className="relative w-full max-w-full px-4 py-8">
-        <div style={{ width: '1080px', height: '1080px', position: 'relative' }}>
+    <div className="relative w-screen h-screen overflow-hidden bg-black font-sans">
+      <div className="absolute inset-x-0 top-0 z-50 flex justify-center p-4">
+        <Dock
+          items={items}
+          iconSize={48}
+          gap={5}
+          borderRadius={16}
+          className="w-fit bg-black/85 border-black/20 text-white shadow-xl"
+        />
+      </div>
+      <div className="absolute inset-0 z-40 flex items-center justify-center px-4 text-white">
+        <SplitText
+          text="Explore Your Music Universe"
+          className="text-6xl md:text-7xl font-bold text-center"
+          delay={50}
+          duration={1.25}
+          ease="power3.out"
+          splitType="chars"
+          from={{ opacity: 0, y: 40 }}
+          to={{ opacity: 1, y: 0 }}
+          threshold={0.1}
+          rootMargin="-100px"
+          textAlign="center"
+          onLetterAnimationComplete={handleAnimationComplete}
+        />
+      </div>
+
+      <div className="absolute inset-0 z-0">
+        <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
           <PixelBlast
             variant="square"
             pixelSize={3}
