@@ -5,7 +5,7 @@ import { Dock } from "@/components/unlumen-ui/dock";
 import SplitText from "@/components/SplitText";
 
 const items = [
-  { icon: "🌐", label: "Browser" },
+  { icon: "🌐", label: "Browser", href: "/browser" },
   { icon: "📁", label: "Files", href: "/files" },
   { icon: "🎵", label: "Music", href: "/music" },
   { icon: "📷", label: "Photos", href: "/photos" },
