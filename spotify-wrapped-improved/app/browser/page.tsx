@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { COUNTRY_PLAYLISTS } from "@/lib/countryPlaylists";
+import { matchCountries } from "@/lib/matchCountries";
 
 type Track = {
   rank: number;
@@ -13,11 +15,20 @@ type Track = {
   popularity: number;
 };
 
+type CountryMatch = {
+  country: string;
+  overlapCount: number;
+  overlapPct: number;
+  matchedTrackIds: string[];
+};
+
 export default function Browser() {
   const { data: session, status } = useSession();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [countryMatch, setCountryMatch] = useState<CountryMatch | null>(null);
+  const [countryMatchLoading, setCountryMatchLoading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -38,8 +49,64 @@ export default function Browser() {
         .finally(() => setLoading(false));
     } else if (status === "unauthenticated") {
       setLoading(false);
+      setTracks([]);
+      setCountryMatch(null);
     }
   }, [status]);
+
+  useEffect(() => {
+    if (tracks.length === 0) {
+      setCountryMatch(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const runCountryMatch = async () => {
+      setCountryMatchLoading(true);
+
+      try {
+        const userTrackIds = tracks.map((track) => track.id);
+        const countryChartEntries = await Promise.all(
+          Object.entries(COUNTRY_PLAYLISTS).map(async ([country, playlistId]) => {
+            try {
+              const res = await fetch(`/api/country-chart?playlist_id=${playlistId}`);
+              if (!res.ok) {
+                throw new Error(`Country chart request failed: ${res.status}`);
+              }
+
+              const data = await res.json();
+              return [country, data.trackIds as string[]] as const;
+            } catch {
+              return [country, [] as string[]] as const;
+            }
+          })
+        );
+
+        const countryChartData = Object.fromEntries(countryChartEntries) as Record<string, string[]>;
+        const matches = matchCountries(userTrackIds, countryChartData);
+
+        if (!cancelled) {
+          setCountryMatch(matches[0] ?? null);
+        }
+      } catch (err) {
+        console.error("Unable to match your tracks to countries", err);
+        if (!cancelled) {
+          setCountryMatch(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setCountryMatchLoading(false);
+        }
+      }
+    };
+
+    runCountryMatch();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tracks]);
 
   if (status === "loading" || loading) {
     return (
@@ -76,6 +143,23 @@ export default function Browser() {
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
       <h1 className="text-3xl font-bold mb-6">Your Top Tracks</h1>
+
+      <div className="max-w-2xl mx-auto mb-8 rounded-lg border border-white/10 bg-white/5 p-4">
+        <p className="text-sm uppercase tracking-[0.2em] text-white/40">Closest country match</p>
+        {countryMatchLoading ? (
+          <p className="mt-2 text-white/70">Comparing your top tracks to country charts...</p>
+        ) : countryMatch ? (
+          <>
+            <p className="mt-2 text-xl font-semibold">{countryMatch.country}</p>
+            <p className="mt-1 text-sm text-white/70">
+              {countryMatch.overlapCount} shared tracks ({countryMatch.overlapPct.toFixed(1)}% of your top tracks)
+            </p>
+          </>
+        ) : (
+          <p className="mt-2 text-white/70">Your country match will appear here once the analysis finishes.</p>
+        )}
+      </div>
+
       <div className="max-w-2xl mx-auto flex flex-col gap-2">
         {tracks.map((track) => (
           <div
