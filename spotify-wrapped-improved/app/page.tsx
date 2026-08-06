@@ -71,6 +71,8 @@ export default function Home() {
       <div className="absolute inset-0 z-0">
         <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
           <PixelBlast
+            className="h-full w-full"
+            style={{ width: "100%", height: "100%" }}
             variant="square"
             pixelSize={3}
             color="#97cfa6"

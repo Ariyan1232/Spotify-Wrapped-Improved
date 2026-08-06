@@ -17,7 +17,6 @@ export const COUNTRY_PLAYLISTS: Record<string, string> = {
     "Sweden": "37i9dQZEVXbLoATJ81JYXz",
     "Spain": "37i9dQZEVXbNFJfN1Vw8d9",
     "Portugal": "37i9dQZEVXbKyJS56d1pgi",
-    "Australia": "37i9dQZEVXbJPcfkRz0wJ0",
     "New Zealand": "37i9dQZEVXbM8SIrkERIYl",
     "Saudi Arabia": "37i9dQZEVXbJ6IpvItkve3",
     "United Arab Emirates": "37i9dQZEVXbM6UuNw2oiP1",
