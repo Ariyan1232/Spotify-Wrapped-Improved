@@ -63,7 +63,8 @@ async function fetchCountryChart(
   );
 
   if (!res.ok) {
-    console.warn(`  Skipping playlist ${playlistId}: Spotify returned ${res.status}`);
+    const errorBody = await res.text();
+    console.warn(`  Skipping playlist ${playlistId}: Spotify returned ${res.status} — ${errorBody}`);
     return [];
   }
 
